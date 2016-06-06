@@ -113,26 +113,25 @@ class ButtonAndText:
         self.column = column
         self.name = name
         self.button = Button(frame, text=self.name, height=4, width=15, wraplength=100, command=callbackPlaceHolder).grid(row=self.row,column=self.column,pady=(10,0))
-        #self.data = "ff:ff:ff:ff:ff:ff"
-        self.scrollbar = Scrollbar(frame) #create a scrollbar
+        #create a scrollbar
+        self.scrollbar = Scrollbar(frame)
         #attach the scrollbar to the text window, disable user editing of contents. 
         self.textwidget = Text(frame, height=4, width=35)
         self.textwidget.grid(row=self.row,column=self.column+1,sticky=W, pady=(10,0))
         self.scrollbar.grid(row=self.row,column=self.column+2,sticky=E+N+S, pady=(10,0))
-
-        #update the text window with data
-        #self.textwidget.insert(END, self.data)
         self.scrollbar.config(command=self.textwidget.yview)
         self.textwidget.config(yscrollcommand=self.scrollbar.set)
 
-        #configure the text widget to not allow user input
-        #self.textwidget.config(state=DISABLED)
-
         #add radio buttons
+        pass
+    
     def addData(self,data):
+        #allow the text widget to be updated
         self.textwidget.config(state=NORMAL)
         self.data = data
+        #update the text window with data
         self.textwidget.insert(END, self.data)
+        #prevent user from editing contents
         self.textwidget.config(state=DISABLED)
 
 getDevID = ButtonAndText(frame,"Get ID",2,0)
