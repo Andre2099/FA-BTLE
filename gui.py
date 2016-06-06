@@ -41,6 +41,9 @@ options['title'] = 'Location for the investigation'
 #flags
 invstg_opened_flag = 0 #to tell if any investigation was opened.
 
+#the rest of globals
+invstgn_ID="No Investigation Open..."
+
 def callbackPlaceHolder():
     #this callback does nothing, it just a placeholder for testing gui
     print "Button pressed"
@@ -59,12 +62,13 @@ def fileSave():
     print "Saves the report file wherever you would like"
 
 def fileOpen():
-    #this is a placeholder for file>open menu item.
+    #this is for file>open menu item.
     print "file open"
     global invstgn_directory
     invstgn_directory = tkFileDialog.askdirectory(**dir_opt)
     #debug
     print invstgn_directory
+    #check this flag in the button callbacks before trying to read files
     invstg_opened_flag = 1
 
 
@@ -103,8 +107,7 @@ frame = Frame(mainWindow)
 frame.grid(padx=10, pady=10)
 
 Label(frame, text = "Investigation ID:", font="TkDefaultfont 9").grid(row=0,column=0,sticky=W)
-invstgn_ID_value="No Investigation Open..."
-Label(frame, text=invstgn_ID_value, font="Helvetica 8 italic").grid(row=1,column=0)
+Label(frame, text=invstgn_ID, font="Helvetica 8 italic").grid(row=1,column=0)
 #invstgn_ID_field = Entry(frame).grid(row=1,column=0)
 
 ##==--==Button-And-Window Class==--==--##
@@ -138,7 +141,7 @@ class ButtonAndText:
         self.textwidget.config(state=DISABLED)
 
 getDevID = ButtonAndText(frame,"Get ID",2,0)
-capRspn = ButtonAndText(frame,"Get Response",3,0)
+capRspn = ButtonAndText(frame,"Capture Response",3,0)
 capRspn.addData("Advertising Packets OK...\nReponse detected...\n")
 capSync = ButtonAndText(frame,"Capture Sync",4,0)
 capSync.addData("Connection Request...\nTime interval check...\n")
