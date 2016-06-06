@@ -26,6 +26,8 @@ import Tkinter,tkFileDialog
 from Tkinter import *
 from tkFileDialog import *
 import sys, time
+import pathlib
+from pathlib import *
 
 mainWindow = Tk()
 mainWindow.wm_title("Maestro: Fitbit BTLE Traffic Analyzer")
@@ -42,7 +44,8 @@ options['title'] = 'Location for the investigation'
 invstg_opened_flag = 0 #to tell if any investigation was opened.
 
 #the rest of globals
-invstgn_ID="No Investigation Open..."
+invstgn_ID = StringVar()
+invstgn_ID.set("No Investigation Open...")
 
 def callbackPlaceHolder():
     #this callback does nothing, it just a placeholder for testing gui
@@ -65,12 +68,14 @@ def fileOpen():
     #this is for file>open menu item.
     print "file open"
     global invstgn_directory
-    invstgn_directory = tkFileDialog.askdirectory(**dir_opt)
+    invstgn_directory = pathlib.Path(tkFileDialog.askdirectory(**dir_opt))
     #debug
     print invstgn_directory
+    invstgn_ID.set(str(invstgn_directory).split("\\")[-1])
+    #get the folder name
+    
     #check this flag in the button callbacks before trying to read files
-    invstg_opened_flag = 1
-
+    invstgn_opened_flag = 1
 
 def fileClose():
     print "Closes the investigation"
@@ -107,7 +112,7 @@ frame = Frame(mainWindow)
 frame.grid(padx=10, pady=10)
 
 Label(frame, text = "Investigation ID:", font="TkDefaultfont 9").grid(row=0,column=0,sticky=W)
-Label(frame, text=invstgn_ID, font="Helvetica 8 italic").grid(row=1,column=0)
+Label(frame, textvariable=invstgn_ID, font="Helvetica 8 italic").grid(row=1,column=0)
 #invstgn_ID_field = Entry(frame).grid(row=1,column=0)
 
 ##==--==Button-And-Window Class==--==--##
