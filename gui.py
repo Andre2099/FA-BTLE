@@ -16,6 +16,7 @@
    To Do:
        - Create flag for investigation open via File->New.. or File->Open.. and have buttons check. This is to ensure that the user wont be running tests in garbage directory.
        - use os.makedirs(directory) for file->New... don't forget to check if it doesn't already exist with os.path.exists
+       - Add radio buttons to select the type of characterization file. 
 
    '''
 
@@ -36,14 +37,14 @@ options['initialdir'] = 'C:\\'
 options['mustexist'] = True
 options['parent'] = mainWindow
 options['title'] = 'Location for the investigation'
-    
+
+#flags
+invstg_opened_flag = 0 #to tell if any investigation was opened.
 
 def callbackPlaceHolder():
     #this callback does nothing, it just a placeholder for testing gui
     print "Button pressed"
     getDevID.addData("ff:ff:ff:ff:ff:ff")
-    #waste some time to see affect on main loop
-    time.sleep(5)
 
 def fileNew():
     print "steps out of any investigation folder if its in one, then clears the text fields,"
@@ -60,11 +61,11 @@ def fileSave():
 def fileOpen():
     #this is a placeholder for file>open menu item.
     print "file open"
+    global invstgn_directory
     invstgn_directory = tkFileDialog.askdirectory(**dir_opt)
     #debug
     print invstgn_directory
-    print "check for a .inv file to verify it is a project."
-    print "give an error and reject the attempt if its not there."
+    invstg_opened_flag = 1
 
 
 def fileClose():
@@ -131,6 +132,8 @@ class ButtonAndText:
         self.data = data
         #update the text window with data
         self.textwidget.insert(END, self.data)
+        self.textwidget.see(Tkinter.END)
+        mainWindow.update()
         #prevent user from editing contents
         self.textwidget.config(state=DISABLED)
 
