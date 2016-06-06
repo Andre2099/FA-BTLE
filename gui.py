@@ -6,35 +6,53 @@
    Author: F. Andre Bertomeu
    Title: FA Firmware Engineer
    Date Created: 5/26/2016
-   Last update: 5/31/2016
+   Last update: 6/5/2016
    Ver: ??.???.???
 
    Comments: For the sake of time I just created this incrementally. The buttons and layout I got just right then just copied and paste more.
    I don't like this implementation. See the to do list below.
+   Created a class for buttons with the text widget. Way cleaner.
 
    To Do:
-       - Create a Git repo and push on to it ASAP!
-       - Make the buttons one class, then invoke each button as an object.
+       - Create flag for investigation open via File->New.. or File->Open.. and have buttons check. This is to ensure that the user wont be running tests in garbage directory.
+       - use os.makedirs(directory) for file->New... don't forget to check if it doesn't already exist with os.path.exists
+
    '''
 
 from __future__ import division
 
+import Tkinter,tkFileDialog
 from Tkinter import *
 from tkFileDialog import *
-import sys
+import sys, time
 
 mainWindow = Tk()
 mainWindow.wm_title("Maestro: Fitbit BTLE Traffic Analyzer")
 mainWindow.wm_iconbitmap('favicon.ico')
 
+# defining options for accessing a directory
+dir_opt = options = {}
+options['initialdir'] = 'C:\\'
+options['mustexist'] = True
+options['parent'] = mainWindow
+options['title'] = 'Location for the investigation'
+    
+
 def callbackPlaceHolder():
     #this callback does nothing, it just a placeholder for testing gui
     print "Button pressed"
+    getDevID.addData("ff:ff:ff:ff:ff:ff")
+    #waste some time to see affect on main loop
+    time.sleep(5)
 
 def fileNew():
-    print "steps out of any investigation folder if its in one, then clears the text fields."
-    print "should have a Save pop up with a window to enter investigation number"
-    print "this Investigation number should go in a variable for file access."
+    print "steps out of any investigation folder if its in one, then clears the text fields,"
+    print "and the directory variable. Pretty much like closing everything and opening it up fresh." 
+    print "Should have a Save pop up with a window to enter investigation number"
+    print "this Investigation number will be the directory name that will be created."
+    print "the directory path is then saved in the investigation directory variable."
+    print "Make sure to check first if directory already exists."
+    print "when an investigation is created, make a investigation .inv file. \n Look for this file to exist when doing File->Open..." 
 
 def fileSave():
     print "Saves the report file wherever you would like"
@@ -42,6 +60,12 @@ def fileSave():
 def fileOpen():
     #this is a placeholder for file>open menu item.
     print "file open"
+    invstgn_directory = tkFileDialog.askdirectory(**dir_opt)
+    #debug
+    print invstgn_directory
+    print "check for a .inv file to verify it is a project."
+    print "give an error and reject the attempt if its not there."
+
 
 def fileClose():
     print "Closes the investigation"
@@ -82,76 +106,42 @@ invstgn_ID_value="No Investigation Open..."
 Label(frame, text=invstgn_ID_value, font="Helvetica 8 italic").grid(row=1,column=0)
 #invstgn_ID_field = Entry(frame).grid(row=1,column=0)
 
-##==--==GetID==--==--##
-getDevIDButton = Button(frame, text="Get ID", height=4, width=15, command=callbackPlaceHolder).grid(row=2,column=0,pady=(10,0))
-devIDdata = "ff:ff:ff:ff:ff:ff"
-devIDScrollBar = Scrollbar(frame) #create a scrollbar
-#attach the scrollbar to the text window, disable user editing of contents. 
-devIDResult = Text(frame, height=4, width=35)
-devIDResult.grid(row=2,column=1,sticky=W, pady=(10,0))
+##==--==Button-And-Window Class==--==--##
+class ButtonAndText:
+    def __init__(self,master,name,row,column):
+        self.row = row
+        self.column = column
+        self.name = name
+        self.button = Button(frame, text=self.name, height=4, width=15, wraplength=100, command=callbackPlaceHolder).grid(row=self.row,column=self.column,pady=(10,0))
+        #self.data = "ff:ff:ff:ff:ff:ff"
+        self.scrollbar = Scrollbar(frame) #create a scrollbar
+        #attach the scrollbar to the text window, disable user editing of contents. 
+        self.textwidget = Text(frame, height=4, width=35)
+        self.textwidget.grid(row=self.row,column=self.column+1,sticky=W, pady=(10,0))
+        self.scrollbar.grid(row=self.row,column=self.column+2,sticky=E+N+S, pady=(10,0))
 
-devIDScrollBar.grid(row=2,column=2,sticky=E+N+S, pady=(10,0))
-#update the text window with data
-devIDResult.insert(END, devIDdata)
-devIDScrollBar.config(command=devIDResult.yview)
-devIDResult.config(yscrollcommand=devIDScrollBar.set)
+        #update the text window with data
+        #self.textwidget.insert(END, self.data)
+        self.scrollbar.config(command=self.textwidget.yview)
+        self.textwidget.config(yscrollcommand=self.scrollbar.set)
 
-#configure the text widget to not allow user input
-devIDResult.config(state=DISABLED)
+        #configure the text widget to not allow user input
+        #self.textwidget.config(state=DISABLED)
 
-#add radio buttons
+        #add radio buttons
+    def addData(self,data):
+        self.textwidget.config(state=NORMAL)
+        self.data = data
+        self.textwidget.insert(END, self.data)
+        self.textwidget.config(state=DISABLED)
 
-##==--==Capture Response==--==--##
-capRspnButton = Button(frame, text="Capture Response", height=4, width=15, command=callbackPlaceHolder).grid(row=3,column=0,pady=(10,0))
-responseData= "Advertising Packets OK...\nReponse detected...\n"
-capRspnScrollBar = Scrollbar(frame) #create a scrollbar
-#attach the scrollbar to the text window, disable user editing of contents. 
-capRspnResult = Text(frame, height=4, width=35)
-capRspnResult.grid(row=3,column=1,sticky=W, pady=(10,0))
-
-capRspnScrollBar.grid(row=3,column=2,sticky=E+N+S, pady=(10,0))
-#update the text window with data
-capRspnResult.insert(END, responseData)
-capRspnScrollBar.config(command=capRspnResult.yview)
-capRspnResult.config(yscrollcommand=capRspnScrollBar.set)
-
-#configure the text widget to not allow user input
-capRspnResult.config(state=DISABLED)
-
-##==--==Capture Sync==--==--##
-capSyncButton = Button(frame, text="Capture Sync", height=4, width=15, command=callbackPlaceHolder).grid(row=4,column=0,pady=(10,0))
-syncData= "Connection Request...\nTime interval check...\n"
-capSyncScrollBar = Scrollbar(frame) #create a scrollbar
-#attach the scrollbar to the text window, disable user editing of contents. 
-capSyncResult = Text(frame, height=4, width=35)
-capSyncResult.grid(row=4,column=1,sticky=W, pady=(10,0))
-
-capSyncScrollBar.grid(row=4,column=2,sticky=E+N+S, pady=(10,0))
-#update the text window with data
-capSyncResult.insert(END, syncData)
-capSyncScrollBar.config(command=capSyncResult.yview)
-capSyncResult.config(yscrollcommand=capSyncScrollBar.set)
-
-#configure the text widget to not allow user input
-capSyncResult.config(state=DISABLED)
-
-##==--==Capture Notification==--==--##
-capNtfnButton = Button(frame, text="Capture Notification", height=4, width=15, wraplength=100, command=callbackPlaceHolder).grid(row=5,column=0,pady=(10,0))
-notificationData= "Opcode num...\nTime interval check...\n"
-capNtfnScrollBar = Scrollbar(frame) #create a scrollbar
-#attach the scrollbar to the text window, disable user editing of contents. 
-capNtfnResult = Text(frame, height=4, width=35)
-capNtfnResult.grid(row=5,column=1,sticky=W, pady=(10,0))
-
-capNtfnScrollBar.grid(row=5,column=2,sticky=E+N+S, pady=(10,0))
-#update the text window with data
-capNtfnResult.insert(END, syncData)
-capNtfnScrollBar.config(command=capNtfnResult.yview)
-capNtfnResult.config(yscrollcommand=capNtfnScrollBar.set)
-
-#configure the text widget to not allow user input
-capNtfnResult.config(state=DISABLED)
-
+getDevID = ButtonAndText(frame,"Get ID",2,0)
+capRspn = ButtonAndText(frame,"Get Response",3,0)
+capRspn.addData("Advertising Packets OK...\nReponse detected...\n")
+capSync = ButtonAndText(frame,"Capture Sync",4,0)
+capSync.addData("Connection Request...\nTime interval check...\n")
+capNtfn = ButtonAndText(frame,"Capture Notification",5,0)
+capNtfn.addData("Opcode num...\nTime interval check...\n")
 mainWindow.mainloop()
 
 
